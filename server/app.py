@@ -83,9 +83,8 @@ class RestaurantPizzas(Resource):
         except ValueError:
             return make_response({"errors": ["price must be between 1 and 30"]}, 400)
             
-        restaurant = Restaurant.query.get(restaurant_id)
-        pizza = Pizza.query.get(pizza_id)
-        
+        restaurant = Restaurant.query.filter_by(id=restaurant_id).first()
+        pizza = Pizza.query.filter_by(id=pizza_id).first()
         
         if not restaurant or not pizza:
             return make_response({"errors": ["validation errors"]}, 400)
@@ -101,12 +100,23 @@ class RestaurantPizzas(Resource):
             db.session.commit()
 
             return make_response({
-                "id": pizza.id,
-                "name": pizza.name,
-                "ingredients": pizza.ingredients
+                "id": new_restaurant_pizza.id,
+                "price": new_restaurant_pizza.price,
+                "pizza_id": new_restaurant_pizza.pizza_id,
+                "restaurant_id": new_restaurant_pizza.restaurant_id,
+                "pizza": {
+                    "id": pizza.id,
+                    "name": pizza.name,
+                    "ingredients": pizza.ingredients
+                },
+                "restaurant": {
+                    "id": restaurant.id,
+                    "name": restaurant.name,
+                    "address": restaurant.address
+                }
             }, 201)
             
-        except ValueError as e:
+        except ValueError:
             return make_response({"errors": ["validation errors"]}, 400)
 
 api.add_resource(Restaurants, '/restaurants')
